@@ -8,11 +8,13 @@ public class Player : MonoBehaviour
     public float maxSpeed;
     Rigidbody2D rb;
     SpriteRenderer sr;
+    Animator ani;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
+        ani = GetComponent<Animator>();
     }
 
     void Update()
@@ -26,10 +28,18 @@ public class Player : MonoBehaviour
             rb.constraints = RigidbodyConstraints2D.None;
 
         if (Input.GetButtonUp("Horizontal")) // Stop Speed
-            rb.velocity = new Vector2(rb.velocity.normalized.x * stopSpeed, rb.velocity.y);
+            // rb.velocity = new Vector2(rb.velocity.normalized.x * 0.1f, rb.velocity.y);
+            rb.velocity = new Vector2(0, rb.velocity.y);
 
-        if (Input.GetButtonDown("Horizontal")) // 바라보는 방향
+        Debug.Log("rb.velocity: "+rb.velocity);
+        // Debug.Log("rb.velocity.normalized.x: "+rb.velocity.normalized.x);
+
+        if (Input.GetButton("Horizontal")) // 바라보는 방향
             sr.flipX = Input.GetAxis("Horizontal") < 0;
+    
+        if (Mathf.Abs(rb.velocity.x) < 0.3)
+            ani.SetBool("isRun", false);
+        else ani.SetBool("isRun", true);
     }
 
     void FixedUpdate()
