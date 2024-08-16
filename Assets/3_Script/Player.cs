@@ -6,6 +6,8 @@ public class Player : MonoBehaviour
     public float stopSpeed;
     public float moveSpeed;
     public float maxSpeed;
+    public float jumpPower;
+
     Rigidbody2D rb;
     SpriteRenderer sr;
     Animator ani;
@@ -27,19 +29,24 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.X))
             rb.constraints = RigidbodyConstraints2D.None;
 
-        if (Input.GetButtonUp("Horizontal")) // Stop Speed
-            // rb.velocity = new Vector2(rb.velocity.normalized.x * 0.1f, rb.velocity.y);
-            rb.velocity = new Vector2(0, rb.velocity.y);
+        if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump")){
+            rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            ani.SetBool("isJump", true);
+        }
 
-        Debug.Log("rb.velocity: "+rb.velocity);
+        // if (Input.GetButtonUp("Horizontal")) // Stop Speed <-이 값을 반대 방향으로 세게 주면 멈추는 효과 구현 가능
+            // rb.velocity = new Vector2(rb.velocity.normalized.x * stopSpeed, rb.velocity.y);
+            // rb.velocity = new Vector2(0, rb.velocity.y);
+        // Debug.Log("rb.velocity: "+rb.velocity);
         // Debug.Log("rb.velocity.normalized.x: "+rb.velocity.normalized.x);
 
         if (Input.GetButton("Horizontal")) // 바라보는 방향
             sr.flipX = Input.GetAxis("Horizontal") < 0;
     
-        if (Mathf.Abs(rb.velocity.x) < 0.3)
+        if (Mathf.Abs(rb.velocity.x) < 2)
             ani.SetBool("isRun", false);
-        else ani.SetBool("isRun", true);
+        else
+            ani.SetBool("isRun", true);
     }
 
     void FixedUpdate()
@@ -49,5 +56,15 @@ public class Player : MonoBehaviour
 
         if (Mathf.Abs(rb.velocity.x) > maxSpeed) // Max Speed
             rb.velocity = new Vector2(Mathf.Sign(rb.velocity.x) * maxSpeed, rb.velocity.y);
+        
+        // Landing Platform
+        if(rb.velocity.y < 0){
+            Debug.DrawRay(rb.position, Vector3.down, new Color(0, 1, 0));
+            RaycastHit2D rayHit = Physics2D.Raycast(rb.position, Vector3.down, 1, LayerMask.GetMask("Platform"));
+            if(rayHit.collider != null){
+                if(rayHit.distance < 0.5f)
+                    ani.SetBool("isJump", false);
+            }
+        }
     }
 }
