@@ -57,7 +57,7 @@ public class Player : MonoBehaviour
         if (Mathf.Abs(rb.velocity.x) > maxSpeed) // Max Speed
             rb.velocity = new Vector2(Mathf.Sign(rb.velocity.x) * maxSpeed, rb.velocity.y);
         
-        // Landing Platform
+        // Platform Cheak
         if(rb.velocity.y < 0){
             Debug.DrawRay(rb.position, Vector3.down, new Color(0, 1, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(rb.position, Vector3.down, 1, LayerMask.GetMask("Platform"));
