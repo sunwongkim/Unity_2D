@@ -27,18 +27,14 @@ public class Enemy : MonoBehaviour
         } else
             ani.SetBool("isRun", false);
             
-        // Platform Cheak - Ray를 객체보다 앞에 두어 바닥 체크
+        // Platform Cheak by Ray
         Vector2 frontVec = new Vector2(rb.position.x + nextMove, rb.position.y);
         if(rb.velocity.y < 0){
             Debug.DrawRay(frontVec, Vector3.down, new Color(0, 1, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector3.down, 2, LayerMask.GetMask("Platform"));
             if(rayHit.collider == null){
                 nextMove = -nextMove;
-                CancelInvoke("Think");
-                InvokeRepeating("Think", 0, intervalTime);
                 Debug.Log("cliff");
-                // if(rayHit.distance < 0.5f)
-                //     ani.SetBool("isJump", false);
             }
         }
     }
@@ -46,6 +42,6 @@ public class Enemy : MonoBehaviour
     void Think()
     {
         nextMove = Random.Range(-1, 2); // -1,0,1
-        Debug.Log("nextMove: " + nextMove);
+        // Debug.Log("nextMove: " + nextMove);
     }
 }

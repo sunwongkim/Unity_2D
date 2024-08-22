@@ -1,3 +1,4 @@
+using Unity.Burst.Intrinsics;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -57,7 +58,7 @@ public class Player : MonoBehaviour
         if (Mathf.Abs(rb.velocity.x) > maxSpeed) // Max Speed
             rb.velocity = new Vector2(Mathf.Sign(rb.velocity.x) * maxSpeed, rb.velocity.y);
         
-        // Platform Cheak
+        // Platform Cheak by Ray
         if(rb.velocity.y < 0){
             Debug.DrawRay(rb.position, Vector3.down, new Color(0, 1, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(rb.position, Vector3.down, 1, LayerMask.GetMask("Platform"));
@@ -66,5 +67,27 @@ public class Player : MonoBehaviour
                     ani.SetBool("isJump", false);
             }
         }
+    }
+
+    void OnCollisionEnter2D(Collision2D other) {
+        if (other.gameObject.tag == "Enemy")
+            OnDamaged(other.transform.position);
+    }
+
+    void OnDamaged(Vector2 targetPosition)
+    {
+        gameObject.layer = LayerMask.NameToLayer("PlayerDamaged");
+        sr.color = new Color(1, 0, 1, 0.4f);
+
+        int direction = (transform.position.x - targetPosition.x > 0) ? 1 : -1;
+        rb.AddForce(new Vector2(direction, 1)*10, ForceMode2D.Impulse);
+
+        Invoke("OffDamaged", 3);
+    }
+
+    void OffDamaged()
+    {
+        gameObject.layer = LayerMask.NameToLayer("Player");
+        sr.color = new Color(1, 1, 1, 1);
     }
 }
