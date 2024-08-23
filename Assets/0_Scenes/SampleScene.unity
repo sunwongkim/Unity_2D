@@ -1036,6 +1036,7 @@ MonoBehaviour:
   moveSpeed: 2
   maxSpeed: 5
   jumpPower: 30
+  reboundPower: 10
 --- !u!70 &890586607
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

@@ -13,8 +13,8 @@ public class Enemy : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         ani = GetComponent<Animator>();
-        // float nextThinkTime = Random.Range(2f, 5f);
-        InvokeRepeating("Think", 0, intervalTime);
+        // float nextMoveTime = Random.Range(2f, 5f);
+        InvokeRepeating(nameof(EnemyAI), 0, intervalTime);
     }
 
     void FixedUpdate()
@@ -39,7 +39,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    void Think()
+    void EnemyAI()
     {
         nextMove = Random.Range(-1, 2); // -1,0,1
         // Debug.Log("nextMove: " + nextMove);

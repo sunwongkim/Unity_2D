@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public float moveSpeed;
     public float maxSpeed;
     public float jumpPower;
+    public float reboundPower;
 
     Rigidbody2D rb;
     SpriteRenderer sr;
@@ -78,11 +79,12 @@ public class Player : MonoBehaviour
     {
         gameObject.layer = LayerMask.NameToLayer("PlayerDamaged");
         sr.color = new Color(1, 0, 1, 0.4f);
+        ani.SetTrigger("doDamaged");
 
         int direction = (transform.position.x - targetPosition.x > 0) ? 1 : -1;
-        rb.AddForce(new Vector2(direction, 1)*10, ForceMode2D.Impulse);
+        rb.AddForce(new Vector2(direction, 1) * reboundPower, ForceMode2D.Impulse);
 
-        Invoke("OffDamaged", 3);
+        Invoke(nameof(OffDamaged), 3f);
     }
 
     void OffDamaged()
