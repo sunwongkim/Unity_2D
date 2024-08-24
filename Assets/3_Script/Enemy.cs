@@ -44,4 +44,10 @@ public class Enemy : MonoBehaviour
         nextMove = Random.Range(-1, 2); // -1,0,1
         // Debug.Log("nextMove: " + nextMove);
     }
+
+    public void OnStomped()
+    {
+        sr.flipY = !sr.flipY;
+        // 죽는 모션 후 비활성화
+    }
 }

@@ -182,7 +182,7 @@ GameObject:
   - component: {fileID: 363269247}
   m_Layer: 8
   m_Name: Trap
-  m_TagString: Enemy
+  m_TagString: Trap
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1037,6 +1037,8 @@ MonoBehaviour:
   maxSpeed: 5
   jumpPower: 30
   reboundPower: 10
+  stompDistance: 0.7
+  safeTime: 2
 --- !u!70 &890586607
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

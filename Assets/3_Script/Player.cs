@@ -1,4 +1,3 @@
-using Unity.Burst.Intrinsics;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -9,11 +8,14 @@ public class Player : MonoBehaviour
     public float maxSpeed;
     public float jumpPower;
     public float reboundPower;
+    public float stompDistance;
+    public float safeTime;
 
     Rigidbody2D rb;
     SpriteRenderer sr;
     Animator ani;
-
+    Enemy enemyScript;
+    
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -23,9 +25,9 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R)) // Player 위치 강제 이동
+        // R: Player 위치 초기화, Z: 회전 고정, X: 해제
+        if (Input.GetKeyDown(KeyCode.R))
             transform.position = new Vector2(-1, 1);
-        // Z: 회전 고정, X: 해제
         if (Input.GetKeyDown(KeyCode.Z))
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         if (Input.GetKeyDown(KeyCode.X))
@@ -35,12 +37,6 @@ public class Player : MonoBehaviour
             rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
             ani.SetBool("isJump", true);
         }
-
-        // if (Input.GetButtonUp("Horizontal")) // Stop Speed <-이 값을 반대 방향으로 세게 주면 멈추는 효과 구현 가능
-            // rb.velocity = new Vector2(rb.velocity.normalized.x * stopSpeed, rb.velocity.y);
-            // rb.velocity = new Vector2(0, rb.velocity.y);
-        // Debug.Log("rb.velocity: "+rb.velocity);
-        // Debug.Log("rb.velocity.normalized.x: "+rb.velocity.normalized.x);
 
         if (Input.GetButton("Horizontal")) // 바라보는 방향
             sr.flipX = Input.GetAxis("Horizontal") < 0;
@@ -59,32 +55,43 @@ public class Player : MonoBehaviour
         if (Mathf.Abs(rb.velocity.x) > maxSpeed) // Max Speed
             rb.velocity = new Vector2(Mathf.Sign(rb.velocity.x) * maxSpeed, rb.velocity.y);
         
-        // Platform Cheak by Ray
-        if(rb.velocity.y < 0){
+        // Player보다 앞에서 바닥으로 Ray 조사하여 바닥 확인
+        if (rb.velocity.y < 0){ // 떨어지는 중
             Debug.DrawRay(rb.position, Vector3.down, new Color(0, 1, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(rb.position, Vector3.down, 1, LayerMask.GetMask("Platform"));
-            if(rayHit.collider != null){
-                if(rayHit.distance < 0.5f)
+            if (rayHit.collider != null){
+                if (rayHit.distance < 0.5f)
                     ani.SetBool("isJump", false);
             }
         }
     }
 
     void OnCollisionEnter2D(Collision2D other) {
-        if (other.gameObject.tag == "Enemy")
+        if (other.gameObject.tag == "Enemy"){
+            if (enemyScript == null) // 처음에 한 번 캐싱
+                enemyScript = other.gameObject.GetComponent<Enemy>();
+            // Stomp
+            if (transform.position.y - other.transform.position.y > stompDistance){ // 적보다 위에 위치
+                enemyScript.OnStomped();
+                // 밟고 통 튀기게
+            } else { // Damaged
+                OnDamaged(other.transform.position);
+            }
+        } else if (other.gameObject.tag == "Trap"){
             OnDamaged(other.transform.position);
+        }
     }
 
     void OnDamaged(Vector2 targetPosition)
     {
         gameObject.layer = LayerMask.NameToLayer("PlayerDamaged");
-        sr.color = new Color(1, 0, 1, 0.4f);
+        sr.color = new Color(1, 0, 1, 0.5f);
         ani.SetTrigger("doDamaged");
 
         int direction = (transform.position.x - targetPosition.x > 0) ? 1 : -1;
         rb.AddForce(new Vector2(direction, 1) * reboundPower, ForceMode2D.Impulse);
 
-        Invoke(nameof(OffDamaged), 3f);
+        Invoke(nameof(OffDamaged), safeTime);
     }
 
     void OffDamaged()
