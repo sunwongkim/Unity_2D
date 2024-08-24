@@ -72,8 +72,8 @@ public class Player : MonoBehaviour
                 enemyScript = other.gameObject.GetComponent<Enemy>();
             // Stomp
             if (transform.position.y - other.transform.position.y > stompDistance){ // 적보다 위에 위치
+                rb.AddForce(Vector2.up * reboundPower, ForceMode2D.Impulse);
                 enemyScript.OnStomped();
-                // 밟고 통 튀기게
             } else { // Damaged
                 OnDamaged(other.transform.position);
             }

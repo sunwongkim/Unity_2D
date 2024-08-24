@@ -4,15 +4,18 @@ public class Enemy : MonoBehaviour
 {
     public float nextMove;
     public float intervalTime;
+    public float rebound;
     Rigidbody2D rb;
     SpriteRenderer sr;
     Animator ani;
+    CapsuleCollider2D cd;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         ani = GetComponent<Animator>();
+        cd = GetComponent<CapsuleCollider2D>();
         // float nextMoveTime = Random.Range(2f, 5f);
         InvokeRepeating(nameof(EnemyAI), 0, intervalTime);
     }
@@ -32,10 +35,8 @@ public class Enemy : MonoBehaviour
         if(rb.velocity.y < 0){
             Debug.DrawRay(frontVec, Vector3.down, new Color(0, 1, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector3.down, 2, LayerMask.GetMask("Platform"));
-            if(rayHit.collider == null){
+            if(rayHit.collider == null)
                 nextMove = -nextMove;
-                Debug.Log("cliff");
-            }
         }
     }
 
@@ -47,7 +48,16 @@ public class Enemy : MonoBehaviour
 
     public void OnStomped()
     {
-        sr.flipY = !sr.flipY;
-        // 죽는 모션 후 비활성화
+        rb.AddForce(Vector2.up * rebound, ForceMode2D.Impulse);
+        sr.color = new Color(1, 1, 1, 0.5f);
+        sr.flipY = true;
+        cd.enabled = false;
+        Invoke(nameof(DeleteEnemy), 3);
+    }
+
+    void DeleteEnemy()
+    {
+        // gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 }
