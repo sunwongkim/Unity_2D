@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+// Layer를 적들끼리 충돌하지 않도록 설정한 상태
     public float nextMove;
     public float intervalTime;
     public float rebound;
@@ -43,7 +44,6 @@ public class Enemy : MonoBehaviour
     void EnemyAI()
     {
         nextMove = Random.Range(-1, 2); // -1,0,1
-        // Debug.Log("nextMove: " + nextMove);
     }
 
     public void OnStomped()

@@ -10,11 +10,12 @@ public class Player : MonoBehaviour
     public float reboundPower;
     public float stompDistance;
     public float safeTime;
+    public GameManager gameManager;
 
     Rigidbody2D rb;
     SpriteRenderer sr;
     Animator ani;
-    Enemy enemyScript;
+    Enemy enemy;
     
     void Start()
     {
@@ -25,13 +26,8 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        // R: Player 위치 초기화, Z: 회전 고정, X: 해제
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R)) // R: Player 위치 초기화
             transform.position = new Vector2(-1, 1);
-        if (Input.GetKeyDown(KeyCode.Z))
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        if (Input.GetKeyDown(KeyCode.X))
-            rb.constraints = RigidbodyConstraints2D.None;
 
         if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump")){
             rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
@@ -66,15 +62,27 @@ public class Player : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter2D(Collision2D other) {
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "Coin"){
+            other.gameObject.SetActive(false);
+            gameManager.stagePoint += 50;
+        } else if(other.gameObject.tag == "Finish"){
+            gameManager.NextStage();
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D other)
+    {
         if (other.gameObject.tag == "Enemy"){
-            if (enemyScript == null) // 처음에 한 번 캐싱
-                enemyScript = other.gameObject.GetComponent<Enemy>();
+            if (enemy == null) // 캐싱
+                enemy = other.gameObject.GetComponent<Enemy>();
             // Stomp
             if (transform.position.y - other.transform.position.y > stompDistance){ // 적보다 위에 위치
                 rb.AddForce(Vector2.up * reboundPower, ForceMode2D.Impulse);
-                enemyScript.OnStomped();
-            } else { // Damaged
+                enemy.OnStomped();
+                gameManager.stagePoint += 100;
+            } else { // 실패 시 피해
                 OnDamaged(other.transform.position);
             }
         } else if (other.gameObject.tag == "Trap"){
@@ -84,19 +92,21 @@ public class Player : MonoBehaviour
 
     void OnDamaged(Vector2 targetPosition)
     {
-        gameObject.layer = LayerMask.NameToLayer("PlayerDamaged");
+        gameObject.layer = LayerMask.NameToLayer("PlayerDamaged"); // Enemy 무시
+        // Graphics
         sr.color = new Color(1, 0, 1, 0.5f);
         ani.SetTrigger("doDamaged");
-
+        // Physics
         int direction = (transform.position.x - targetPosition.x > 0) ? 1 : -1;
         rb.AddForce(new Vector2(direction, 1) * reboundPower, ForceMode2D.Impulse);
-
+        // Logics
+        gameManager.Life --;
         Invoke(nameof(OffDamaged), safeTime);
     }
 
     void OffDamaged()
     {
-        gameObject.layer = LayerMask.NameToLayer("Player");
+        gameObject.layer = LayerMask.NameToLayer("Player"); // Enemy 무시 해제
         sr.color = new Color(1, 1, 1, 1);
     }
 }
