@@ -6,7 +6,6 @@ public class GameManager : MonoBehaviour
     public int stagePoint;
     public int stageIndex;
     public int Life;
-    public Player player;
     
     void Start()
     {
@@ -18,12 +17,9 @@ public class GameManager : MonoBehaviour
         
     }
 
-    void OnTriggerEnter2D(Collider2D other) {
-        if(other.gameObject.tag == "Player"){
-            player.transform.position = new Vector2(-1, 1);
-            Life --;
-            Debug.Log("log");
-        }
+    public void OnPlayerDied()
+    {
+        Debug.Log("Player Die...");
     }
 
     public void NextStage()

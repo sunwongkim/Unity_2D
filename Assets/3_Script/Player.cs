@@ -10,18 +10,20 @@ public class Player : MonoBehaviour
     public float reboundPower;
     public float stompDistance;
     public float safeTime;
+    private int playerLayer;
+    private int enemyLayer;
     public GameManager gameManager;
-
     Rigidbody2D rb;
     SpriteRenderer sr;
     Animator ani;
-    Enemy enemy;
     
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         ani = GetComponent<Animator>();
+        playerLayer = LayerMask.NameToLayer("Player");
+        enemyLayer = LayerMask.NameToLayer("Enemy");
     }
 
     void Update()
@@ -67,21 +69,24 @@ public class Player : MonoBehaviour
         if (other.gameObject.tag == "Coin"){
             other.gameObject.SetActive(false);
             gameManager.stagePoint += 50;
-        } else if(other.gameObject.tag == "Finish"){
+        } else if (other.gameObject.tag == "Finish"){
             gameManager.NextStage();
+        } else if (other.gameObject.tag == "GameManager"){ // 추락
+            OnDamaged(other.transform.position);
+            // rb.velocity = Vector2.zero;
+            transform.position = new Vector2(-1, 1);
         }
     }
 
     void OnCollisionEnter2D(Collision2D other)
     {
         if (other.gameObject.tag == "Enemy"){
-            if (enemy == null) // 캐싱
-                enemy = other.gameObject.GetComponent<Enemy>();
+            Enemy enemy = other.gameObject.GetComponent<Enemy>();
             // Stomp
-            if (transform.position.y - other.transform.position.y > stompDistance){ // 적보다 위에 위치
+            if (transform.position.y - other.transform.position.y > stompDistance){ // 위에서 밟음
                 rb.AddForce(Vector2.up * reboundPower, ForceMode2D.Impulse);
-                enemy.OnStomped();
                 gameManager.stagePoint += 100;
+                enemy.OnStomped();
             } else { // 실패 시 피해
                 OnDamaged(other.transform.position);
             }
@@ -92,7 +97,8 @@ public class Player : MonoBehaviour
 
     void OnDamaged(Vector2 targetPosition)
     {
-        gameObject.layer = LayerMask.NameToLayer("PlayerDamaged"); // Enemy 무시
+        // Enemy와 충돌 무시(투명 효과)
+        Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, true);
         // Graphics
         sr.color = new Color(1, 0, 1, 0.5f);
         ani.SetTrigger("doDamaged");
@@ -100,13 +106,17 @@ public class Player : MonoBehaviour
         int direction = (transform.position.x - targetPosition.x > 0) ? 1 : -1;
         rb.AddForce(new Vector2(direction, 1) * reboundPower, ForceMode2D.Impulse);
         // Logics
-        gameManager.Life --;
+        if (gameManager.Life > 0){
+            gameManager.Life --;
+        } else {
+            gameManager.OnPlayerDied();
+        }
         Invoke(nameof(OffDamaged), safeTime);
     }
 
     void OffDamaged()
     {
-        gameObject.layer = LayerMask.NameToLayer("Player"); // Enemy 무시 해제
+        Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, false); // 투명 해제
         sr.color = new Color(1, 1, 1, 1);
     }
 }

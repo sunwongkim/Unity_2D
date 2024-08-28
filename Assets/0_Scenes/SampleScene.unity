@@ -1252,7 +1252,6 @@ MonoBehaviour:
   stagePoint: 0
   stageIndex: 0
   Life: 3
-  player: {fileID: 890586606}
 --- !u!4 &1147821579
 Transform:
   m_ObjectHideFlags: 0
