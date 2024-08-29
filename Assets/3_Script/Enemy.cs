@@ -18,20 +18,15 @@ public class Enemy : MonoBehaviour
         cd = GetComponent<CapsuleCollider2D>();
         // float nextMoveTime = Random.Range(2f, 5f);
         InvokeRepeating(nameof(EnemyAI), 0, intervalTime);
-        // Enemy 끼리는 충돌하지 않음
-        int enemyLayer = LayerMask.NameToLayer("Enemy");
-        Physics2D.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
     }
 
     void FixedUpdate()
     {
         rb.velocity = new Vector2(nextMove, rb.velocity.y);
         // 바라보는 방향
-        if (nextMove != 0){
+        if (nextMove != 0)
             sr.flipX = nextMove > 0;
-            ani.SetBool("isRun", true);
-        } else
-            ani.SetBool("isRun", false);
+        ani.SetBool("isRun", nextMove != 0);
 
         // Platform Cheak by Ray
         Vector2 frontVec = new Vector2(rb.position.x + nextMove, rb.position.y);

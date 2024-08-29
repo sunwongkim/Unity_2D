@@ -29,7 +29,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.R)) // R: Player 위치 초기화
-            transform.position = new Vector2(-1, 1);
+            transform.position = new Vector2(0, 0);
 
         if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump")){
             rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
@@ -39,10 +39,7 @@ public class Player : MonoBehaviour
         if (Input.GetButton("Horizontal")) // 바라보는 방향
             sr.flipX = Input.GetAxis("Horizontal") < 0;
     
-        if (Mathf.Abs(rb.velocity.x) < 2)
-            ani.SetBool("isRun", false);
-        else
-            ani.SetBool("isRun", true);
+        ani.SetBool("isRun", Mathf.Abs(rb.velocity.x) >= 2);
     }
 
     void FixedUpdate()
@@ -53,14 +50,13 @@ public class Player : MonoBehaviour
         if (Mathf.Abs(rb.velocity.x) > maxSpeed) // Max Speed
             rb.velocity = new Vector2(Mathf.Sign(rb.velocity.x) * maxSpeed, rb.velocity.y);
         
-        // Player보다 앞에서 바닥으로 Ray 조사하여 바닥 확인
+        // 바닥 확인 (by Ray)
         if (rb.velocity.y < 0){ // 떨어지는 중
             Debug.DrawRay(rb.position, Vector3.down, new Color(0, 1, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(rb.position, Vector3.down, 1, LayerMask.GetMask("Platform"));
-            if (rayHit.collider != null){
-                if (rayHit.distance < 0.5f)
-                    ani.SetBool("isJump", false);
-            }
+            // 바닥 확인
+            if (rayHit.collider != null && rayHit.distance < 0.5f)
+                ani.SetBool("isJump", false);
         }
     }
 
@@ -74,7 +70,7 @@ public class Player : MonoBehaviour
         } else if (other.gameObject.tag == "GameManager"){ // 추락
             OnDamaged(other.transform.position);
             // rb.velocity = Vector2.zero;
-            transform.position = new Vector2(-1, 1);
+            transform.position = new Vector2(0, 0);
         }
     }
 
