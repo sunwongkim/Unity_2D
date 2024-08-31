@@ -27,7 +27,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.R)) // R: Player 위치 초기화
-            resetPosition();
+            ResetPosition();
             
         if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump")){
             rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
@@ -65,10 +65,10 @@ public class Player : MonoBehaviour
             gameManager.stagePoint += 50;
         } else if (other.gameObject.tag == "Finish"){
             gameManager.NextStage();
-            resetPosition();
+            ResetPosition();
         } else if (other.gameObject.tag == "GameManager"){ // 추락
             OnDamaged(other.transform.position);
-            resetPosition();
+            ResetPosition();
         }
     }
 
@@ -102,11 +102,7 @@ public class Player : MonoBehaviour
         int direction = (transform.position.x - targetPosition.x > 0) ? 1 : -1;
         rb.AddForce(new Vector2(direction, 1) * reboundPower, ForceMode2D.Impulse);
         // Logics
-        if (gameManager.Life > 0){
-            gameManager.Life --;
-        } else {
-            gameManager.OnPlayerDied();
-        }
+        gameManager.UILifeDamaged();
         Invoke(nameof(OffDamaged), safeTime);
     }
 
@@ -116,5 +112,8 @@ public class Player : MonoBehaviour
         sr.color = new Color(1, 1, 1, 1);
     }
 
-    void resetPosition() {transform.position = new Vector2(0, 1);}
+    void ResetPosition()
+    {
+        transform.position = new Vector2(0, 1);
+    }
 }
