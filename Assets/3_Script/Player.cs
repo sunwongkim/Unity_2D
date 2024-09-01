@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Player : MonoBehaviour
 {
@@ -12,16 +13,37 @@ public class Player : MonoBehaviour
     public float safeTime;
     private int playerLayer;
     private int enemyLayer;
+    public AudioClip audioJump;
+    public AudioClip audioItem;
+    public AudioClip audioStomp;
+    public AudioClip audioDamaged;
+    public AudioClip audioDeath;
+    public AudioClip audioNextStage;
+    public AudioClip audioClear;
     public GameManager gameManager;
+    public enum AudioAction {JUMP, ITEM, STOMP, DAMAGED, DEATH, NEXTSTAGE, CLEAR}
+    Dictionary<AudioAction, AudioClip> audioCollection;
     Rigidbody2D rb;
     SpriteRenderer sr;
-    Animator ani;
+    Animator ani; 
+    AudioSource ad;
     
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         ani = GetComponent<Animator>();
+        ad = GetComponent<AudioSource>();
+                // 딕셔너리 초기화
+        audioCollection = new Dictionary<AudioAction, AudioClip>{
+            {AudioAction.JUMP, audioJump},
+            {AudioAction.ITEM, audioItem},
+            {AudioAction.STOMP, audioStomp},
+            {AudioAction.DAMAGED, audioDamaged},
+            {AudioAction.DEATH, audioDeath},
+            {AudioAction.NEXTSTAGE, audioNextStage},
+            {AudioAction.CLEAR, audioClear}
+        };
     }
 
     void Update()
@@ -32,6 +54,7 @@ public class Player : MonoBehaviour
         if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump")){
             rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
             ani.SetBool("isJump", true);
+            PlaySound(AudioAction.JUMP);
         }
         
         if (Input.GetButton("Horizontal")) // 바라보는 방향
@@ -115,5 +138,12 @@ public class Player : MonoBehaviour
     void ResetPosition()
     {
         transform.position = new Vector2(0, 1);
+    }
+    public void PlaySound(AudioAction action)
+    {
+        if (audioCollection.TryGetValue(action, out AudioClip clip)){
+            ad.clip = clip;
+            ad.Play();
+        }
     }
 }

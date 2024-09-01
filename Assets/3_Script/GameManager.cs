@@ -23,9 +23,9 @@ public class GameManager : MonoBehaviour
     {
         UIPoint.text = "SCORE: " + (totalPoint + stagePoint).ToString();
     }
-    public void OnPlayerDied()
+    public void OnPlayerDeath()
     {
-        // Debug.Log("Player Die...");
+        // Debug.Log("Player Death...");
     }
 
     public void UILifeDamaged()
