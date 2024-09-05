@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 public class Player : MonoBehaviour
 {
-
     public float stopSpeed;
     public float moveSpeed;
     public float maxSpeed;
@@ -13,20 +12,20 @@ public class Player : MonoBehaviour
     public float safeTime;
     private int playerLayer;
     private int enemyLayer;
+    public GameManager gameManager;
+    Rigidbody2D rb;
+    SpriteRenderer sr;
+    Animator ani; 
+    AudioSource ad;
     public AudioClip audioJump;
-    public AudioClip audioItem;
+    public AudioClip audioCoin;
     public AudioClip audioStomp;
     public AudioClip audioDamaged;
     public AudioClip audioDeath;
     public AudioClip audioNextStage;
     public AudioClip audioClear;
-    public GameManager gameManager;
-    public enum AudioAction {JUMP, ITEM, STOMP, DAMAGED, DEATH, NEXTSTAGE, CLEAR}
+    public enum AudioAction {JUMP, COIN, STOMP, DAMAGED, DEATH, NEXTSTAGE, CLEAR}
     Dictionary<AudioAction, AudioClip> audioCollection;
-    Rigidbody2D rb;
-    SpriteRenderer sr;
-    Animator ani; 
-    AudioSource ad;
     
     void Start()
     {
@@ -37,7 +36,7 @@ public class Player : MonoBehaviour
                 // 딕셔너리 초기화
         audioCollection = new Dictionary<AudioAction, AudioClip>{
             {AudioAction.JUMP, audioJump},
-            {AudioAction.ITEM, audioItem},
+            {AudioAction.COIN, audioCoin},
             {AudioAction.STOMP, audioStomp},
             {AudioAction.DAMAGED, audioDamaged},
             {AudioAction.DEATH, audioDeath},
@@ -54,7 +53,8 @@ public class Player : MonoBehaviour
         if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump")){
             rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
             ani.SetBool("isJump", true);
-            PlaySound(AudioAction.JUMP);
+            // PlaySound(AudioAction.JUMP);
+            AudioManager.Instance.PlayJumpSound();
         }
         
         if (Input.GetButton("Horizontal")) // 바라보는 방향
@@ -86,9 +86,11 @@ public class Player : MonoBehaviour
         if (other.gameObject.tag == "Coin"){
             other.gameObject.SetActive(false);
             gameManager.stagePoint += 50;
+            PlaySound(AudioAction.COIN);
         } else if (other.gameObject.tag == "Finish"){
             gameManager.NextStage();
             ResetPosition();
+            PlaySound(AudioAction.NEXTSTAGE);
         } else if (other.gameObject.tag == "GameManager"){ // 추락
             OnDamaged(other.transform.position);
             ResetPosition();
@@ -104,11 +106,14 @@ public class Player : MonoBehaviour
                 rb.AddForce(Vector2.up * reboundPower, ForceMode2D.Impulse);
                 gameManager.stagePoint += 100;
                 enemy.OnStomped();
+                PlaySound(AudioAction.STOMP);
             } else { // 실패 시 피해
                 OnDamaged(other.transform.position);
+                PlaySound(AudioAction.DAMAGED);
             }
         } else if (other.gameObject.tag == "Trap"){
             OnDamaged(other.transform.position);
+            PlaySound(AudioAction.DAMAGED);
         }
     }
 
@@ -135,10 +140,8 @@ public class Player : MonoBehaviour
         sr.color = new Color(1, 1, 1, 1);
     }
 
-    void ResetPosition()
-    {
-        transform.position = new Vector2(0, 1);
-    }
+    void ResetPosition() => transform.position = new Vector2(0, 1);
+
     public void PlaySound(AudioAction action)
     {
         if (audioCollection.TryGetValue(action, out AudioClip clip)){

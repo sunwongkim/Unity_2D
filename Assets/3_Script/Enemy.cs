@@ -38,10 +38,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    void EnemyAI()
-    {
-        nextMove = Random.Range(-1, 2); // -1,0,1
-    }
+    void EnemyAI() => nextMove = Random.Range(-1, 2); // -1,0,1
 
     public void OnStomped()
     {
@@ -53,8 +50,5 @@ public class Enemy : MonoBehaviour
         Invoke(nameof(DeleteEnemy), 3);
     }
 
-    void DeleteEnemy()
-    {
-        gameObject.SetActive(false);
-    }
+    void DeleteEnemy() => gameObject.SetActive(false);
 }
