@@ -21,11 +21,15 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.R)) // R: Player 위치 초기화
+            NextStage();
         UIPoint.text = "SCORE: " + (totalPoint + stagePoint).ToString();
     }
+    
     public void OnPlayerDeath()
     {
-        // Debug.Log("Player Death...");
+        Debug.Log("DEAD");
+        AudioManager.Instance.PlayDeathSound();
     }
 
     public void UILifeDamaged()
@@ -35,7 +39,7 @@ public class GameManager : MonoBehaviour
             UILifeArray[Life].color = new Color(1, 0, 0, 0.4f);
         } else {
             RestartBtn.SetActive(true);
-            Debug.Log("DEAD");
+            OnPlayerDeath();
         }
     }
 
@@ -44,19 +48,21 @@ public class GameManager : MonoBehaviour
         // 모든 스테이지 비활성화
         foreach (GameObject stage in stageArray)
             stage.SetActive(false);
-        // 현재 스테이지만 활성화
-        if (stageIndex < stageArray.Length) {
+        
+        if (stageIndex < stageArray.Length) { // Next Stage
             stageIndex++;
-        } else {
+            AudioManager.Instance.PlayNextStageSound();
+        } else { // Game Clear
             RestartBtn.SetActive(true);
-            // stageIndex = 1;
+            AudioManager.Instance.PlayClearSound();
         }
-        stageArray[stageIndex - 1].SetActive(true);  // stageIndex는 1부터 시작하므로 -1 해줌
+        // 현재 스테이지만 활성화
+        stageArray[stageIndex - 1].SetActive(true);  // stageIndex는 1부터 시작하므로 -1 보정
         
         UIStage.text = "STAGE " + stageIndex.ToString();
     }
 
-    public void OnRestart()
+    public void OnRestartBtnClick()
     {
         SceneManager.LoadScene(0); // 현재 씬
     }

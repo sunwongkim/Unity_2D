@@ -16,33 +16,12 @@ public class Player : MonoBehaviour
     Rigidbody2D rb;
     SpriteRenderer sr;
     Animator ani; 
-    AudioSource ad;
-    public AudioClip audioJump;
-    public AudioClip audioCoin;
-    public AudioClip audioStomp;
-    public AudioClip audioDamaged;
-    public AudioClip audioDeath;
-    public AudioClip audioNextStage;
-    public AudioClip audioClear;
-    public enum AudioAction {JUMP, COIN, STOMP, DAMAGED, DEATH, NEXTSTAGE, CLEAR}
-    Dictionary<AudioAction, AudioClip> audioCollection;
-    
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         ani = GetComponent<Animator>();
-        ad = GetComponent<AudioSource>();
-                // 딕셔너리 초기화
-        audioCollection = new Dictionary<AudioAction, AudioClip>{
-            {AudioAction.JUMP, audioJump},
-            {AudioAction.COIN, audioCoin},
-            {AudioAction.STOMP, audioStomp},
-            {AudioAction.DAMAGED, audioDamaged},
-            {AudioAction.DEATH, audioDeath},
-            {AudioAction.NEXTSTAGE, audioNextStage},
-            {AudioAction.CLEAR, audioClear}
-        };
     }
 
     void Update()
@@ -86,11 +65,10 @@ public class Player : MonoBehaviour
         if (other.gameObject.tag == "Coin"){
             other.gameObject.SetActive(false);
             gameManager.stagePoint += 50;
-            PlaySound(AudioAction.COIN);
+            AudioManager.Instance.PlayCoinSound();
         } else if (other.gameObject.tag == "Finish"){
             gameManager.NextStage();
             ResetPosition();
-            PlaySound(AudioAction.NEXTSTAGE);
         } else if (other.gameObject.tag == "GameManager"){ // 추락
             OnDamaged(other.transform.position);
             ResetPosition();
@@ -106,14 +84,12 @@ public class Player : MonoBehaviour
                 rb.AddForce(Vector2.up * reboundPower, ForceMode2D.Impulse);
                 gameManager.stagePoint += 100;
                 enemy.OnStomped();
-                PlaySound(AudioAction.STOMP);
+                AudioManager.Instance.PlayStompSound();
             } else { // 실패 시 피해
                 OnDamaged(other.transform.position);
-                PlaySound(AudioAction.DAMAGED);
             }
         } else if (other.gameObject.tag == "Trap"){
             OnDamaged(other.transform.position);
-            PlaySound(AudioAction.DAMAGED);
         }
     }
 
@@ -132,6 +108,7 @@ public class Player : MonoBehaviour
         // Logics
         gameManager.UILifeDamaged();
         Invoke(nameof(OffDamaged), safeTime);
+        AudioManager.Instance.PlayDamagedSound();
     }
 
     void OffDamaged()
@@ -141,12 +118,4 @@ public class Player : MonoBehaviour
     }
 
     void ResetPosition() => transform.position = new Vector2(0, 1);
-
-    public void PlaySound(AudioAction action)
-    {
-        if (audioCollection.TryGetValue(action, out AudioClip clip)){
-            ad.clip = clip;
-            ad.Play();
-        }
-    }
 }
