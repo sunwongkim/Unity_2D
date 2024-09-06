@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Player : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class Player : MonoBehaviour
     public float safeTime;
     private int playerLayer;
     private int enemyLayer;
+    public GameManager gameManager;
     Rigidbody2D rb;
     SpriteRenderer sr;
     Animator ani; 
@@ -62,10 +64,10 @@ public class Player : MonoBehaviour
     {
         if (other.gameObject.tag == "Coin"){
             other.gameObject.SetActive(false);
-            GameManager.Instance.stagePoint += 50;
+            gameManager.stagePoint += 50;
             AudioManager.Instance.PlayCoinSound();
         } else if (other.gameObject.tag == "Finish"){
-            GameManager.Instance.NextStage();
+            gameManager.NextStage();
             ResetPosition();
         } else if (other.gameObject.tag == "GameManager"){ // 추락
             OnDamaged(other.transform.position);
@@ -80,7 +82,7 @@ public class Player : MonoBehaviour
             // Stomp
             if (transform.position.y - other.transform.position.y > stompDistance){ // 위에서 밟음
                 rb.AddForce(Vector2.up * reboundPower, ForceMode2D.Impulse);
-                GameManager.Instance.stagePoint += 100;
+                gameManager.stagePoint += 100;
                 enemy.OnStomped();
                 AudioManager.Instance.PlayStompSound();
             } else { // 실패 시 피해
@@ -104,7 +106,7 @@ public class Player : MonoBehaviour
         int direction = (transform.position.x - targetPosition.x > 0) ? 1 : -1;
         rb.AddForce(new Vector2(direction, 1) * reboundPower, ForceMode2D.Impulse);
         // Logics
-        GameManager.Instance.UILifeDamaged();
+        gameManager.UILifeDamaged();
         Invoke(nameof(OffDamaged), safeTime);
         AudioManager.Instance.PlayDamagedSound();
     }
