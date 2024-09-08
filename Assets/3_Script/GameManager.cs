@@ -8,28 +8,20 @@ public class GameManager : MonoBehaviour
     public int stagePoint;
     public int stageIndex;
     public int Life;
+    private int playerLayer;
+    private int enemyLayer;
     public GameObject[] stageArray;
     public Image[] UILifeArray;
-    public Text UIPoint;
+    public Text[] UIPoint;
     public Text UIStage;
-    public GameObject RestartBtn;
-
-    void Start()
-    {
-        UIStage.text = "STAGE " + stageIndex.ToString();
-    }
+    public Text PopupMessage;
+    public GameObject Popup;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R)) // R: Player 위치 초기화
-            NextStage();
-        UIPoint.text = "SCORE: " + (totalPoint + stagePoint).ToString();
-    }
-    
-    public void OnPlayerDeath()
-    {
-        Debug.Log("DEAD");
-        AudioManager.Instance.PlayDeathSound();
+        // UIPoint.text = (totalPoint + stagePo}int).ToString();
+        foreach (Text pointText in UIPoint)
+            pointText.text = (totalPoint + stagePoint).ToString();
     }
 
     public void UILifeDamaged()
@@ -38,8 +30,7 @@ public class GameManager : MonoBehaviour
             Life--;
             UILifeArray[Life].color = new Color(1, 0, 0, 0.4f);
         } else {
-            RestartBtn.SetActive(true);
-            OnPlayerDeath();
+            PlayerDeath();
         }
     }
 
@@ -53,7 +44,7 @@ public class GameManager : MonoBehaviour
             stageIndex++;
             AudioManager.Instance.PlayNextStageSound();
         } else { // Game Clear
-            RestartBtn.SetActive(true);
+            ShowPopup("Clear");
             AudioManager.Instance.PlayClearSound();
         }
         // 현재 스테이지만 활성화
@@ -62,8 +53,27 @@ public class GameManager : MonoBehaviour
         UIStage.text = "STAGE " + stageIndex.ToString();
     }
 
-    public void OnRestartBtnClick()
+    public void PlayerDeath()
     {
+        Debug.Log("DEAD");
+        ShowPopup("You Died..");
+        AudioManager.Instance.PlayDeathSound();
+    }
+
+    public void ShowPopup(string state)
+    {
+        PopupMessage.text = state.ToString();
+        Popup.SetActive(true);
+        Time.timeScale= 0f;
+    }
+
+    public void OnRestartBtnClick() // OnClick
+    {
+        Time.timeScale= 1f;
+        playerLayer = LayerMask.NameToLayer("Player");
+        enemyLayer = LayerMask.NameToLayer("Enemy");
+        Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, false); // 투명 해제
+
         SceneManager.LoadScene(0); // 현재 씬
     }
 }
