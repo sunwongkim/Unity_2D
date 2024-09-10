@@ -32,21 +32,24 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R)) // R: Player 위치 초기화
             ResetPosition();
         
-        if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump")){
+        if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump"))
             MoveJump();
-        }
         
-        if (Input.GetButton("Horizontal")) // 바라보는 방향
+        // Player Sprite Direction(with UI)
+        if (Input.GetButton("Horizontal"))
             sr.flipX = Input.GetAxis("Horizontal") < 0;
+        sr.flipX = isMovingLeft ? true : sr.flipX;
+        sr.flipX = isMovingRight ? false : sr.flipX;
         
         ani.SetBool("isRun", Mathf.Abs(rb.velocity.x) >= 2);
     }
 
     void FixedUpdate()
     {
-        float moveInput = Input.GetAxis("Horizontal"); // Move Speed
-        if (isMovingLeft) moveInput = -1f;
-        else if (isMovingRight) moveInput = 1f;
+        // Player Move Direction(with UI)
+        float moveInput = Input.GetAxis("Horizontal");
+        moveInput = isMovingLeft ? -1f : moveInput;
+        moveInput = isMovingRight ? 1f : moveInput;
         MoveHorizontal(moveInput);
         
         if (Mathf.Abs(rb.velocity.x) > maxSpeed) // Max Speed
@@ -125,11 +128,13 @@ public class Player : MonoBehaviour
     // Touch Controller
     public void MoveJump()
     {
-        rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-        ani.SetBool("isJump", true);
-        AudioManager.Instance.PlayJumpSound();
+        if (!ani.GetBool("isJump")){
+            rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            ani.SetBool("isJump", true);
+            AudioManager.Instance.PlayJumpSound();
+        }
     }
-    void MoveHorizontal(float moveInput) => rb.AddForce(Vector2.right * moveInput * moveSpeed, ForceMode2D.Impulse);
+    void MoveHorizontal(float moveInput) => rb.AddForce(Vector2.right * moveInput * moveSpeed, ForceMode2D.Impulse); // Move Speed
     public void StartMovingLeft() => isMovingLeft = true;
     public void StopMovingLeft() => isMovingLeft = false;
     public void StartMovingRight() => isMovingRight = true;
