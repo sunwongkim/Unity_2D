@@ -13,7 +13,6 @@ public class Player : MonoBehaviour
     public float safeTime;
     private int playerLayer;
     private int enemyLayer;
-
     private bool isMovingLeft;
     private bool isMovingRight;
     public GameManager gameManager;
@@ -124,15 +123,15 @@ public class Player : MonoBehaviour
     void ResetPosition() => transform.position = new Vector2(0, 1);
 
     // Touch Controller
-    void MoveHorizontal(float moveInput) => rb.AddForce(Vector2.right * moveInput * moveSpeed, ForceMode2D.Impulse);
-    public void StartMovingLeft() => isMovingLeft = true;
-    public void StopMovingLeft() => isMovingLeft = false;
-    public void StartMovingRight() => isMovingRight = true;
-    public void StopMovingRight() => isMovingRight = false;
     public void MoveJump()
     {
         rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
         ani.SetBool("isJump", true);
         AudioManager.Instance.PlayJumpSound();
     }
+    void MoveHorizontal(float moveInput) => rb.AddForce(Vector2.right * moveInput * moveSpeed, ForceMode2D.Impulse);
+    public void StartMovingLeft() => isMovingLeft = true;
+    public void StopMovingLeft() => isMovingLeft = false;
+    public void StartMovingRight() => isMovingRight = true;
+    public void StopMovingRight() => isMovingRight = false;
 }
