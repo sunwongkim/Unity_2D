@@ -1,5 +1,6 @@
 using UnityEngine;
-using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class Player : MonoBehaviour
     public float safeTime;
     private int playerLayer;
     private int enemyLayer;
+    public Button leftBtn;
+    public Button rightBtn;
+    public Button jumpBtn;
     public GameManager gameManager;
     Rigidbody2D rb;
     SpriteRenderer sr;
@@ -107,12 +111,13 @@ public class Player : MonoBehaviour
         rb.AddForce(new Vector2(direction, 1) * reboundPower, ForceMode2D.Impulse);
         // Logics
         gameManager.UILifeDamaged();
-        Invoke(nameof(OffDamaged), safeTime);
+        StartCoroutine(OffDamagedCoroutine());
         AudioManager.Instance.PlayDamagedSound();
     }
 
-    void OffDamaged()
+    IEnumerator OffDamagedCoroutine()
     {
+        yield return new WaitForSecondsRealtime(safeTime);
         Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, false); // 투명 해제
         sr.color = new Color(1, 1, 1, 1);
     }
