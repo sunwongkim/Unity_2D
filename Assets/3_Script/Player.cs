@@ -13,9 +13,9 @@ public class Player : MonoBehaviour
     public float safeTime;
     private int playerLayer;
     private int enemyLayer;
-    public Button leftBtn;
-    public Button rightBtn;
-    public Button jumpBtn;
+
+    private bool isMovingLeft;
+    private bool isMovingRight;
     public GameManager gameManager;
     Rigidbody2D rb;
     SpriteRenderer sr;
@@ -32,12 +32,9 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R)) // R: Player 위치 초기화
             ResetPosition();
-            
+        
         if (Input.GetButtonDown("Jump") && !ani.GetBool("isJump")){
-            rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-            ani.SetBool("isJump", true);
-            // PlaySound(AudioAction.JUMP);
-            AudioManager.Instance.PlayJumpSound();
+            MoveJump();
         }
         
         if (Input.GetButton("Horizontal")) // 바라보는 방향
@@ -49,7 +46,9 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         float moveInput = Input.GetAxis("Horizontal"); // Move Speed
-        rb.AddForce(Vector2.right * moveInput * moveSpeed, ForceMode2D.Impulse);
+        if (isMovingLeft) moveInput = -1f;
+        else if (isMovingRight) moveInput = 1f;
+        MoveHorizontal(moveInput);
         
         if (Mathf.Abs(rb.velocity.x) > maxSpeed) // Max Speed
             rb.velocity = new Vector2(Mathf.Sign(rb.velocity.x) * maxSpeed, rb.velocity.y);
@@ -123,4 +122,17 @@ public class Player : MonoBehaviour
     }
 
     void ResetPosition() => transform.position = new Vector2(0, 1);
+
+    // Touch Controller
+    void MoveHorizontal(float moveInput) => rb.AddForce(Vector2.right * moveInput * moveSpeed, ForceMode2D.Impulse);
+    public void StartMovingLeft() => isMovingLeft = true;
+    public void StopMovingLeft() => isMovingLeft = false;
+    public void StartMovingRight() => isMovingRight = true;
+    public void StopMovingRight() => isMovingRight = false;
+    public void MoveJump()
+    {
+        rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+        ani.SetBool("isJump", true);
+        AudioManager.Instance.PlayJumpSound();
+    }
 }
